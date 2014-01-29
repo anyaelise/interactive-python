@@ -100,7 +100,11 @@ class Ship:
         self.av_delta = 0.05
         
     def draw(self,canvas):
-        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size,self.angle)
+        if self.thrust == False:
+            canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
+        else:
+            thruster_image_center = [self.image_center[0]+90, self.image_center[1]]
+            canvas.draw_image(self.image, thruster_image_center, self.image_size, self.pos, self.image_size, self.angle)
 
     def update(self):
         self.angle += self.angle_vel
@@ -113,6 +117,13 @@ class Ship:
     
     def reset_av(self):
         self.angle_vel = 0
+        
+    def thrusters_on(self):
+        self.thrust = True
+
+    def thrusters_off(self):
+        self.thrust = False
+        
     
 # Sprite class
 class Sprite:
@@ -167,10 +178,14 @@ def keydown(key):
         my_ship.increase_av()
     elif key==simplegui.KEY_MAP["left"]:
         my_ship.decrease_av()
+    elif key==simplegui.KEY_MAP["up"]:
+        my_ship.thrusters_on()
 
 def keyup(key):
     if key==simplegui.KEY_MAP["right"] or key==simplegui.KEY_MAP["left"]:
         my_ship.reset_av()
+    elif key==simplegui.KEY_MAP["up"]:
+        my_ship.thrusters_off()
 
 # timer handler that spawns a rock    
 def rock_spawner():
