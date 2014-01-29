@@ -9,6 +9,8 @@ HEIGHT = 600
 score = 0
 lives = 3
 time = 0.5
+LEFT_SPIN = False
+RIGHT_SPIN = True
 
 class ImageInfo:
     def __init__(self, center, size, radius = 0, lifespan = None, animated = False):
@@ -95,13 +97,22 @@ class Ship:
         self.image_center = info.get_center()
         self.image_size = info.get_size()
         self.radius = info.get_radius()
+        self.av_delta = 0.05
         
     def draw(self,canvas):
-        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size)
+        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size,self.angle)
 
     def update(self):
-        pass
+        self.angle += self.angle_vel
+        
+    def increase_av(self):
+        self.angle_vel += self.av_delta
     
+    def decrease_av(self):
+        self.angle_vel -= self.av_delta
+    
+    def reset_av(self):
+        self.angle_vel = 0
     
 # Sprite class
 class Sprite:
@@ -150,7 +161,17 @@ def draw(canvas):
     my_ship.update()
     a_rock.update()
     a_missile.update()
-            
+
+def keydown(key):
+    if key==simplegui.KEY_MAP["right"]:
+        my_ship.increase_av()
+    elif key==simplegui.KEY_MAP["left"]:
+        my_ship.decrease_av()
+
+def keyup(key):
+    if key==simplegui.KEY_MAP["right"] or key==simplegui.KEY_MAP["left"]:
+        my_ship.reset_av()
+
 # timer handler that spawns a rock    
 def rock_spawner():
     pass
@@ -165,6 +186,8 @@ a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image,
 
 # register handlers
 frame.set_draw_handler(draw)
+frame.set_keydown_handler(keydown)
+frame.set_keyup_handler(keyup)
 
 timer = simplegui.create_timer(1000.0, rock_spawner)
 
