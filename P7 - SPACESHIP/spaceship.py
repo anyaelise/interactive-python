@@ -98,6 +98,7 @@ class Ship:
         self.image_size = info.get_size()
         self.radius = info.get_radius()
         self.av_delta = 0.05
+        self.friction = 0.5
         
     def draw(self,canvas):
         if self.thrust == False:
@@ -108,6 +109,21 @@ class Ship:
 
     def update(self):
         self.angle += self.angle_vel
+        self.pos[0] += self.vel[0]
+        self.pos[1] += self.vel[1]
+        
+        # friction
+        self.vel[0] *= 0.99 #friction
+        self.vel[1] *= 0.99 
+        
+        # screen wrapping
+        self.pos[0] = self.pos[0] % WIDTH
+        self.pos[1] = self.pos[1] % HEIGHT
+        
+        if self.thrust == True:
+            accel = angle_to_vector(self.angle) 
+            self.vel[0] += accel[0]/20
+            self.vel[1] += accel[1]/20
         
     def increase_av(self):
         self.angle_vel += self.av_delta
@@ -120,9 +136,11 @@ class Ship:
         
     def thrusters_on(self):
         self.thrust = True
+        ship_thrust_sound.play()     
 
     def thrusters_off(self):
         self.thrust = False
+        ship_thrust_sound.rewind()
         
     
 # Sprite class
