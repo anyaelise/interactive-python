@@ -162,11 +162,17 @@ class Sprite:
             sound.play()
    
     def draw(self, canvas):        
-        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size)
+        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
         
     
     def update(self):
-        pass        
+        self.angle += self.angle_vel
+        self.pos[0] += self.vel[0]
+        self.pos[1] += self.vel[1]   
+        
+        #screen wrapping
+        self.pos[0] = self.pos[0] % WIDTH
+        self.pos[1] = self.pos[1] % HEIGHT
 
            
 def draw(canvas):
@@ -207,7 +213,14 @@ def keyup(key):
 
 # timer handler that spawns a rock    
 def rock_spawner():
-    pass
+    global a_rock
+    width = random.randint(0, WIDTH)
+    height = random.randint(0, HEIGHT)
+    vel0 = random.randint(-3,3)
+    vel1 = random.randint(-3,3)
+    ang = random.randint(-2,2)
+    ang_vel = 1.0/(random.randint(-100,100))
+    a_rock = Sprite([width, height], [vel0, vel1], ang, ang_vel, asteroid_image, asteroid_info)
     
 # initialize frame
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
