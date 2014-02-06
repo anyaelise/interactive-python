@@ -183,7 +183,7 @@ class Sprite:
 def draw(canvas):
     global time
     
-    # animiate background
+    # animate background
     time += 1
     wtime = (time / 4) % WIDTH
     center = debris_info.get_center()
@@ -201,6 +201,10 @@ def draw(canvas):
     my_ship.update()
     a_rock.update()
     a_missile.update()
+    
+    # draw score and lives
+    canvas.draw_text('Score: '+str(score), (10,30), 20, 'White')
+    canvas.draw_text('Lives Remaining: '+str(lives), (WIDTH-165,30), 20, 'White')
 
 def keydown(key):
     if key==simplegui.KEY_MAP["right"]:
