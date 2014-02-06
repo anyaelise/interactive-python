@@ -141,6 +141,11 @@ class Ship:
     def thrusters_off(self):
         self.thrust = False
         ship_thrust_sound.rewind()
+    
+    def shoot(self):
+        global a_missile
+        angle_vector = angle_to_vector(self.angle)
+        a_missile = Sprite([self.pos[0]+angle_vector[0]*self.radius, self.pos[1]+angle_vector[1]*self.radius], [self.vel[0]+2*angle_vector[0],self.vel[1]+2*angle_vector[1]], 0, 0, missile_image, missile_info, missile_sound)
         
     
 # Sprite class
@@ -204,6 +209,8 @@ def keydown(key):
         my_ship.decrease_av()
     elif key==simplegui.KEY_MAP["up"]:
         my_ship.thrusters_on()
+    elif key==simplegui.KEY_MAP["space"]:
+        my_ship.shoot()
 
 def keyup(key):
     if key==simplegui.KEY_MAP["right"] or key==simplegui.KEY_MAP["left"]:
@@ -219,7 +226,9 @@ def rock_spawner():
     vel0 = random.randint(-3,3)
     vel1 = random.randint(-3,3)
     ang = random.randint(-2,2)
-    ang_vel = 1.0/(random.randint(-100,100))
+    ang_vel = random.randint(-100,100)
+    if ang_vel != 0:
+        ang_vel = 1.0/ang_vel             
     a_rock = Sprite([width, height], [vel0, vel1], ang, ang_vel, asteroid_image, asteroid_info)
     
 # initialize frame
