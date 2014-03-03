@@ -295,6 +295,7 @@ def process_sprite_group(a_set, a_canvas):
         aged_out = sprite.update()
         if aged_out == True:
             removed_sprites.add(sprite)
+    a_set.difference_update(removed_sprites)
             
         
 # helper function to determine whether any items in a set
