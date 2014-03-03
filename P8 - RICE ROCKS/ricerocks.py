@@ -146,6 +146,12 @@ class Ship:
         missile_vel = [self.vel[0] + 6 * forward[0], self.vel[1] + 6 * forward[1]]
         a_missile = Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound)
     
+    def get_position(self):
+        return self.pos
+    
+    def get_radius(self):
+        return self.radius
+    
     
     
 # Sprite class
@@ -177,6 +183,21 @@ class Sprite:
         # update position
         self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
         self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
+        
+    def collide(self, other_object):
+        other_position = other_object.get_position()
+        other_radius = other_object.get_radius()
+        
+        if dist(self.pos, other_position) <= self.radius + other_radius:
+            return True
+        else:
+            return False
+    
+    def get_position(self):
+        return self.pos
+    
+    def get_radius(self):
+        return self.radius
   
         
 # key handlers to control ship   
@@ -211,7 +232,13 @@ def click(pos):
 def draw(canvas):
     global time, started
     
-    # animiate background
+    # check for collisions
+    check_collision = group_collide(rock_group, my_ship)
+    if check_collision == True:
+        global lives
+        lives -= 1
+    
+    # animate background
     time += 1
     wtime = (time / 4) % WIDTH
     center = debris_info.get_center()
@@ -235,7 +262,6 @@ def draw(canvas):
     a_missile.update()
     
     #draw and update rocks
-    #global rock_group
     process_sprite_group(rock_group, canvas)
 
     # draw splash screen if not started
@@ -260,6 +286,19 @@ def process_sprite_group(a_set, a_canvas):
     for sprite in a_set:
         sprite.draw(a_canvas)
         sprite.update()
+        
+# helper function to determine whether any items in a set
+# have collided with another object
+def group_collide(group, other_object):
+    remove_group = set([])
+    for item in group:
+        if item.collide(other_object):
+            remove_group.add(item)
+    if len(remove_group) > 0:
+        group.difference_update(remove_group)
+        return True
+    else:
+        return False
             
 # initialize stuff
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
