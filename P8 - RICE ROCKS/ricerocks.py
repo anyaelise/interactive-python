@@ -140,11 +140,11 @@ class Ship:
         self.angle_vel -= .05
         
     def shoot(self):
-        global a_missile
+        global missile_group
         forward = angle_to_vector(self.angle)
         missile_pos = [self.pos[0] + self.radius * forward[0], self.pos[1] + self.radius * forward[1]]
         missile_vel = [self.vel[0] + 6 * forward[0], self.vel[1] + 6 * forward[1]]
-        a_missile = Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound)
+        missile_group.add(Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound))
     
     def get_position(self):
         return self.pos
@@ -183,6 +183,13 @@ class Sprite:
         # update position
         self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
         self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
+        
+        # update age
+        self.age += 1
+        if self.age >= self.lifespan:
+            return True
+        else:
+            return False
         
     def collide(self, other_object):
         other_position = other_object.get_position()
@@ -253,16 +260,15 @@ def draw(canvas):
     canvas.draw_text(str(lives), [50, 80], 22, "White")
     canvas.draw_text(str(score), [680, 80], 22, "White")
 
-    # draw ship and sprites
+    # draw ship
     my_ship.draw(canvas)
-    a_missile.draw(canvas)
     
-    # update ship and sprites
+    # update ship
     my_ship.update()
-    a_missile.update()
     
-    #draw and update rocks
+    #draw and update sprite groups
     process_sprite_group(rock_group, canvas)
+    process_sprite_group(missile_group, canvas)
 
     # draw splash screen if not started
     if not started:
@@ -283,9 +289,13 @@ def rock_spawner():
         
 # helper function to update/draw a group of sprites
 def process_sprite_group(a_set, a_canvas):
+    removed_sprites = set([])
     for sprite in a_set:
         sprite.draw(a_canvas)
-        sprite.update()
+        aged_out = sprite.update()
+        if aged_out == True:
+            removed_sprites.add(sprite)
+            
         
 # helper function to determine whether any items in a set
 # have collided with another object
@@ -306,7 +316,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 rock_group = set([])
-a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
+missile_group = set([])
 
 
 # register handlers
