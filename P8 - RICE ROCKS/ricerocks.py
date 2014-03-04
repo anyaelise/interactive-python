@@ -237,13 +237,24 @@ def click(pos):
         started = True
 
 def draw(canvas):
-    global time, started
+    global time, started, rock_group, score
     
-    # check for collisions
-    check_collision = group_collide(rock_group, my_ship)
-    if check_collision == True:
+    # check for rock collisions with ship
+    ship_collision = group_collide(rock_group, my_ship)
+    if ship_collision == True:
         global lives
         lives -= 1
+        
+        if lives == 0:
+            started = False
+            rock_group = set([])
+            lives = 3
+            score = 0
+            
+    
+    # check for missile collisions with rocks
+    missile_collision = group_group_collide(rock_group, missile_group)
+    score += missile_collision
     
     # animate background
     time += 1
@@ -280,12 +291,13 @@ def draw(canvas):
 def rock_spawner():
     global rock_group
     
-    if len(rock_group) <= 8:
+    if started and len(rock_group) <= 8:
         rock_pos = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
         rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
         rock_avel = random.random() * .2 - .1
         a_rock = Sprite(rock_pos, rock_vel, 0, rock_avel, asteroid_image, asteroid_info)
-        rock_group.add(a_rock)
+        if dist(rock_pos, my_ship.get_position()) > my_ship.get_radius():
+            rock_group.add(a_rock)
         
 # helper function to update/draw a group of sprites
 def process_sprite_group(a_set, a_canvas):
@@ -295,8 +307,7 @@ def process_sprite_group(a_set, a_canvas):
         aged_out = sprite.update()
         if aged_out == True:
             removed_sprites.add(sprite)
-    a_set.difference_update(removed_sprites)
-            
+    a_set.difference_update(removed_sprites)            
         
 # helper function to determine whether any items in a set
 # have collided with another object
@@ -311,6 +322,17 @@ def group_collide(group, other_object):
     else:
         return False
             
+# helper function for detecting missile/rock collisions
+def group_group_collide(group1, group2):
+    deleted_items = set([])
+    total = 0
+    for item in group1:
+        if group_collide(group2, item):
+            deleted_items.add(item)
+            total += 1
+    group1.difference_update(deleted_items)
+    return total
+    
 # initialize stuff
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
